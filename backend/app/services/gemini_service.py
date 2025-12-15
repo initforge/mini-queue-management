@@ -21,28 +21,14 @@ except ImportError:
 
 class GeminiService:
     def __init__(self):
-        """Initialize Gemini client with API key"""
+        """Initialize Gemini service (no API key at init - provided per request)"""
         if not GEMINI_AVAILABLE:
             logger.warning("google-generativeai package not available. AI features will be disabled.")
-            self.client = None
-            return
-            
-        if not settings.GEMINI_API_KEY:
-            logger.warning("GEMINI_API_KEY not configured. AI features will be disabled.")
-            self.client = None
-            return
-        
-        try:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.client = genai.GenerativeModel('gemini-2.0-flash')
-            logger.info("Gemini AI service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Gemini service: {e}")
-            self.client = None
     
     def generate_response(
         self,
         user_message: str,
+        api_key: str,
         context: Dict[str, Any] = None,
         user_role: str = 'staff',
         conversation_history: List[Dict] = None
@@ -52,6 +38,7 @@ class GeminiService:
         
         Args:
             user_message: User's input message
+            api_key: Gemini API key provided by user
             context: Context data (user info, system data, etc.)
             user_role: User role (staff, manager, admin)
             conversation_history: Previous messages in conversation
@@ -59,13 +46,22 @@ class GeminiService:
         Returns:
             Dict with 'message', 'sources', 'function_calls' etc.
         """
-        if not self.client:
+        if not GEMINI_AVAILABLE:
             return {
                 "message": "Xin lỗi, dịch vụ AI hiện không khả dụng. Vui lòng liên hệ quản trị viên.",
-                "error": "AI service not configured"
+                "error": "AI service not available"
+            }
+        
+        if not api_key or not api_key.strip():
+            return {
+                "message": "Vui lòng cung cấp API key để sử dụng AI Helper. Nhấp vào biểu tượng cài đặt để nhập API key.",
+                "error": "API key required"
             }
         
         try:
+            # Configure Gemini with user-provided API key
+            genai.configure(api_key=api_key.strip())
+            client = genai.GenerativeModel('gemini-2.0-flash')
             # Build system prompt based on user role
             system_prompt = self._build_system_prompt(user_role, context or {})
             
@@ -93,7 +89,7 @@ class GeminiService:
             
             # Generate response using the full prompt
             # Gemini API expects string or list of content parts
-            response = self.client.generate_content(full_prompt)
+            response = client.generate_content(full_prompt)
             
             # Extract text from response - handle different response formats
             if hasattr(response, 'text'):
@@ -175,6 +171,6 @@ Nếu được hỏi về dữ liệu cụ thể, hãy đề xuất sử dụng 
         
         return conversation
 
-# Singleton instance
+# Service instance (no singleton needed - stateless)
 gemini_service = GeminiService()
 

@@ -36,8 +36,8 @@ class Settings(BaseSettings):
     HOST: Optional[str] = "0.0.0.0"
     PORT: Optional[int] = 8000
     
-    # Gemini AI Configuration
-    GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", "AlzaSyBS33D0yduetuAkIMPhfL4CFA_4hYkfd3g")
+    # Gemini AI Configuration - API key is now provided by user via frontend
+    # GEMINI_API_KEY removed for security - users provide their own API keys
     
     # Cloudinary Configuration
     CLOUDINARY_CLOUD_NAME: Optional[str] = os.getenv("CLOUDINARY_CLOUD_NAME", "")

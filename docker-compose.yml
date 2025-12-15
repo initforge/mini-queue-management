@@ -42,7 +42,6 @@ services:
       - PORT=8000
       - DEBUG=true
       - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000,http://localhost,http://127.0.0.1
-      - GEMINI_API_KEY=AIzaSyBS33D0yduetuAklMPhfL4CFA_4hYkfd3g
       - CLOUDINARY_CLOUD_NAME=dghawsj8e
       - CLOUDINARY_API_KEY=872237255328765
       - CLOUDINARY_API_SECRET=AeKphmHpQi6c1sW2nIxOR_0mlz8

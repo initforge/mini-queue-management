@@ -4,6 +4,9 @@ import { useAuth } from '../../shared/AuthContext';
 import aiHelperAPI from '../../shared/services/api/aiHelper';
 import MessageList from './components/MessageList';
 import ContextPanel from './components/ContextPanel';
+import ApiKeyModal from './components/ApiKeyModal';
+
+const GEMINI_API_KEY_STORAGE = 'gemini_api_key';
 
 const AIHelper = ({ role = 'staff' }) => {
   const { user } = useAuth();
@@ -12,7 +15,20 @@ const AIHelper = ({ role = 'staff' }) => {
   const [loading, setLoading] = useState(false);
   const [context, setContext] = useState(null);
   const [conversationId, setConversationId] = useState(null);
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Load API key from LocalStorage on mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem(GEMINI_API_KEY_STORAGE);
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    } else {
+      // Show modal if no API key is saved
+      setShowApiKeyModal(true);
+    }
+  }, []);
   const [suggestedQuestions] = useState([
     'Thống kê hiệu suất của tôi thế nào?',
     'Lịch làm việc tuần này của tôi?',
@@ -59,6 +75,21 @@ const AIHelper = ({ role = 'staff' }) => {
   const handleSendMessage = useCallback(async () => {
     if (!messageInput.trim() || loading) return;
 
+    // Check if API key exists
+    if (!apiKey) {
+      setShowApiKeyModal(true);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: 'assistant',
+          message: 'Vui lòng cung cấp API key để sử dụng AI Helper. Nhấp vào "Cấu hình API Key" ở bên phải.',
+          created_at: new Date().toISOString()
+        }
+      ]);
+      return;
+    }
+
     const userMessage = messageInput.trim();
     setMessageInput('');
     setLoading(true);
@@ -76,7 +107,8 @@ const AIHelper = ({ role = 'staff' }) => {
       const response = await aiHelperAPI.sendMessage(
         userMessage,
         conversationId,
-        context
+        context,
+        apiKey
       );
 
       // Update conversation ID if new conversation
@@ -102,19 +134,32 @@ const AIHelper = ({ role = 'staff' }) => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      let errorMessage = 'Xin lỗi, đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.';
+      
+      // Handle specific error cases
+      if (error.response?.status === 400 && error.response?.data?.detail?.includes('API key')) {
+        errorMessage = 'API key không hợp lệ. Vui lòng kiểm tra lại API key trong cài đặt.';
+        setShowApiKeyModal(true);
+      } else if (error.message?.includes('API key is required')) {
+        errorMessage = 'Vui lòng cung cấp API key để sử dụng AI Helper.';
+        setShowApiKeyModal(true);
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       setMessages(prev => [
         ...prev,
         {
           id: Date.now() + 1,
           role: 'assistant',
-          message: 'Xin lỗi, đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.',
+          message: errorMessage,
           created_at: new Date().toISOString()
         }
       ]);
     } finally {
       setLoading(false);
     }
-  }, [messageInput, conversationId, context, loading]);
+  }, [messageInput, conversationId, context, loading, apiKey]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -137,6 +182,21 @@ const AIHelper = ({ role = 'staff' }) => {
         id: Date.now(),
         role: 'assistant',
         message: `Đã thêm ngữ cảnh: ${contextType}. Bạn có thể hỏi về ${contextType} ngay bây giờ.`,
+        created_at: new Date().toISOString()
+      }
+    ]);
+  }, []);
+
+  const handleApiKeyConfirm = useCallback((newApiKey) => {
+    setApiKey(newApiKey);
+    localStorage.setItem(GEMINI_API_KEY_STORAGE, newApiKey);
+    setShowApiKeyModal(false);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        role: 'assistant',
+        message: 'API key đã được lưu thành công! Bạn có thể bắt đầu sử dụng AI Helper ngay bây giờ.',
         created_at: new Date().toISOString()
       }
     ]);
@@ -234,9 +294,27 @@ const AIHelper = ({ role = 'staff' }) => {
 
         {/* Context Panel */}
         <div className="lg:col-span-1">
-          <ContextPanel context={context} onAddContext={handleAddContext} />
+          <ContextPanel 
+            context={context} 
+            onAddContext={handleAddContext}
+            onOpenApiKeyModal={() => setShowApiKeyModal(true)}
+          />
         </div>
       </div>
+
+      {/* API Key Modal */}
+      <ApiKeyModal
+        isOpen={showApiKeyModal}
+        onClose={() => {
+          // Only allow closing if API key is already set
+          if (apiKey) {
+            setShowApiKeyModal(false);
+          }
+        }}
+        onConfirm={handleApiKeyConfirm}
+        currentApiKey={apiKey}
+        allowClose={!!apiKey} // Only allow closing if API key exists
+      />
     </div>
   );
 };

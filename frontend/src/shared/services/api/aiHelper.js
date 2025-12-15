@@ -5,12 +5,16 @@ const api = new ApiClient();
 const AI_HELPER_API_BASE = '/ai-helper';
 
 class AIHelperAPIService {
-    async sendMessage(message, conversationId = null, context = null) {
+    async sendMessage(message, conversationId = null, context = null, apiKey = null) {
         try {
+            if (!apiKey) {
+                throw new Error('API key is required');
+            }
             return await api.post(`${AI_HELPER_API_BASE}/chat`, {
                 message,
                 conversation_id: conversationId,
-                context
+                context,
+                api_key: apiKey
             });
         } catch (error) {
             console.error('Error sending message to AI:', error);

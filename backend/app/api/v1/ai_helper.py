@@ -21,6 +21,7 @@ class ChatMessage(BaseModel):
     message: str
     conversation_id: Optional[str] = None
     context: Optional[dict] = None
+    api_key: Optional[str] = None  # User-provided Gemini API key
 
 class ChatResponse(BaseModel):
     message: str
@@ -61,8 +62,15 @@ async def chat(
             }
         
         # Generate AI response
+        if not chat_data.api_key:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="API key is required. Please provide your Gemini API key."
+            )
+        
         response = gemini_service.generate_response(
             user_message=chat_data.message,
+            api_key=chat_data.api_key,
             context=context,
             user_role=current_user.role,
             conversation_history=history_list

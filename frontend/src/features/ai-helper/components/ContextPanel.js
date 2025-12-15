@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const ContextPanel = ({ context, onAddContext }) => {
+const ContextPanel = ({ context, onAddContext, onOpenApiKeyModal }) => {
   if (!context) {
     return (
       <div className="bg-gray-50 rounded-xl p-4">
@@ -63,6 +63,20 @@ const ContextPanel = ({ context, onAddContext }) => {
               </motion.button>
             ))}
           </div>
+        </div>
+      )}
+
+      {onOpenApiKeyModal && (
+        <div className="border-t border-blue-200 pt-3 mt-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onOpenApiKeyModal}
+            className="w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-xs font-medium hover:from-purple-600 hover:to-purple-700 transition-colors flex items-center justify-center"
+          >
+            <span className="mr-2">🔑</span>
+            Cấu hình API Key
+          </motion.button>
         </div>
       )}
     </div>
