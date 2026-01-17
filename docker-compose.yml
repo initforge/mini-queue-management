@@ -1,0 +1,108 @@
+# ==============================================
+# DEVELOPMENT DOCKER COMPOSE
+# ==============================================
+# Usage: docker-compose up -d --build
+
+services:
+  # ===================
+  # PostgreSQL Database
+  # ===================
+  db:
+    image: postgres:15-alpine
+    container_name: queue_db
+    environment:
+      POSTGRES_DB: queue_management
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/data.sql:/docker-entrypoint-initdb.d/02_data.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - queue-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===================
+  # Redis Cache
+  # ===================
+  redis:
+    image: redis:7-alpine
+    container_name: queue_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - queue-network
+    restart: unless-stopped
+
+  # ===================
+  # FastAPI Backend
+  # ===================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: queue_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/queue_management
+      - REDIS_URL=redis://redis:6379
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=true
+      - JWT_SECRET_KEY=dev-secret-key-change-in-production
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - queue-network
+    restart: unless-stopped
+
+  # ===================
+  # React Frontend
+  # ===================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:8000/api/v1
+        - REACT_APP_WS_URL=ws://localhost:8000/ws
+    container_name: queue_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - queue-network
+    restart: unless-stopped
+
+# ===================
+# Volumes
+# ===================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ===================
+# Networks
+# ===================
+networks:
+  queue-network:
+    driver: bridge
