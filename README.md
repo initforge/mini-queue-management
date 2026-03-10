@@ -10,8 +10,15 @@ A full-stack queue management system with frontend + backend + database, contain
 
 - **Real-time queue tracking** — live customer queue positions
 - **Service counter management** — assign/release counters
-- **Frontend + Backend** — separate directories with clean separation
-- **Docker Compose** — one command to run entire stack (frontend + backend + DB)
+- **Docker Compose** — one command to run entire stack
+
+## Getting started
+
+```bash
+git clone https://github.com/initforge/mini-queue-management.git
+cd mini-queue-management
+docker-compose up -d
+```
 
 ---
 
