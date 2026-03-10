@@ -10,8 +10,15 @@ Hệ thống quản lý hàng chờ full-stack gồm frontend + backend + databa
 
 - **Theo dõi hàng chờ real-time** — vị trí khách hàng trực tiếp
 - **Quản lý quầy phục vụ** — gán/trả quầy
-- **Frontend + Backend** — tách biệt thư mục rõ ràng
-- **Docker Compose** — 1 lệnh chạy cả stack (frontend + backend + DB)
+- **Docker Compose** — 1 lệnh chạy cả stack
+
+## Cài đặt
+
+```bash
+git clone https://github.com/initforge/mini-queue-management.git
+cd mini-queue-management
+docker-compose up -d
+```
 
 ---
 
