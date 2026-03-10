@@ -1,23 +1,19 @@
 🇻🇳 [Đọc bằng tiếng Việt](README-vi.md)
 
-# Mini Queue Management
+# Mini Queue Management — Service Queue System
 
-Queue management system for service counters
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
 
-## Tech Stack
+A full-stack queue management system with frontend + backend + database, containerized with Docker Compose.
 
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=white)
+## What it does
 
-## Features
-
-- Real-time queue tracking
-- Service counter management
-- Customer notification system
-- Queue analytics
+- **Real-time queue tracking** — live customer queue positions
+- **Service counter management** — assign/release counters
+- **Frontend + Backend** — separate directories with clean separation
+- **Docker Compose** — one command to run entire stack (frontend + backend + DB)
 
 ---
-
-## Author
 
 **Xuan Linh** — Fullstack Developer
 
