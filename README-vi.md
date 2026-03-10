@@ -1,23 +1,19 @@
 🇬🇧 [Read in English](README.md)
 
-# Mini Queue Management
+# Mini Queue Management — Hệ thống Hàng chờ
 
-Hệ thống quản lý hàng chờ cho quầy dịch vụ
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
 
-## Công nghệ
+Hệ thống quản lý hàng chờ full-stack gồm frontend + backend + database, đóng gói bằng Docker Compose.
 
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=white)
+## Tính năng chính
 
-## Tính năng
-
-- Theo dõi hàng chờ real-time
-- Quản lý quầy phục vụ
-- Hệ thống thông báo khách hàng
-- Phân tích hàng chờ
+- **Theo dõi hàng chờ real-time** — vị trí khách hàng trực tiếp
+- **Quản lý quầy phục vụ** — gán/trả quầy
+- **Frontend + Backend** — tách biệt thư mục rõ ràng
+- **Docker Compose** — 1 lệnh chạy cả stack (frontend + backend + DB)
 
 ---
-
-## Tác giả
 
 **Xuan Linh** — Fullstack Developer
 
